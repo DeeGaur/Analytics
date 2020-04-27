@@ -14,7 +14,6 @@ public class App {
 		service.printActiveInvestors();
 		service.getMostBoughtTicker();
 		service.getMostSoldTicker();
-		
 		service.getBuyAndHoldInvestors();
 		
 		ctx.close();

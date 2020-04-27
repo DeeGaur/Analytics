@@ -9,8 +9,5 @@ public interface InvestorDataSource {
 
 	public void dataSourceFromCSVFile();
 	public void dataSourceFromJSONFile();
-	public List<InvestorData> investorDataRepo();
-	public Map<Integer, List<InvestorData>> investorDataMap();
-	
-	public Map<Integer, Map<String, List<InvestorData>>> investorDataMapRepo();
+	public Map<Integer, Map<String, List<InvestorData>>> investorDataMapRepo();	
 }

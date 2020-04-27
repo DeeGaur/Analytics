@@ -24,7 +24,6 @@ import com.investor.behavior.analysis.repo.InvestorDataSource;
  */
 public class InvestorDataServiceImpl implements InvestorDataService {
 
-	// @Autowired
 	private InvestorDataSource investorDataSource;
 
 	public InvestorDataServiceImpl(InvestorDataSource investorDataSource) {
@@ -38,115 +37,105 @@ public class InvestorDataServiceImpl implements InvestorDataService {
 	public void setInvestorDataSource(InvestorDataSource investorDataSource) {
 		this.investorDataSource = investorDataSource;
 	}
-
-	/**
-	 * @return An investor is defined as buy and hold if they have more buy
-	 *         orders than sell orders.
-	 */
+ 
 	@Override
 	public List<Integer> getBuyAndHoldInvestors() {
-		
+
 		Map<Integer, Map<String, List<InvestorData>>> investorDataMap = investorDataSource.investorDataMapRepo();
 		List<Integer> investorList = new ArrayList<>();
 		
-		for(Entry<Integer, Map<String, List<InvestorData>>> e : investorDataMap.entrySet()){
+		for (Entry<Integer, Map<String, List<InvestorData>>> e : investorDataMap.entrySet()) {
 			int buyOrders = 0;
 			int sellOrders = 0;
 			Map<String, List<InvestorData>> tickerMap = e.getValue();
-			for(Entry<String, List<InvestorData>> et : tickerMap.entrySet()){
+			for (Entry<String, List<InvestorData>> et : tickerMap.entrySet()) {
 				List<InvestorData> list = et.getValue();
-				for(InvestorData d : list){
-					if(d.getType().equals(TradeType.BUY)){
+				for (InvestorData d : list) {
+					if (d.getType().equals(TradeType.BUY)) {
 						buyOrders++;
 					}
-					if(d.getType().equals(TradeType.SELL)){
+					if (d.getType().equals(TradeType.SELL)) {
 						sellOrders++;
 					}
 				}
 			}
-			if(buyOrders>sellOrders){
+			if (buyOrders > sellOrders) {
 				investorList.add(e.getKey());
 			}
 		}
 		System.out.print("Buy And Hold Investors are ");
-		for(Integer i : investorList){
-			System.out.print(i+",");
+		for (Integer i : investorList) {
+			System.out.print(i + ",");
 		}
 		System.out.println();
 		return investorList;
 	}
 
 	@Override
-	public String getMostBoughtTicker() {
-		Map<Integer, Map<String, List<InvestorData>>> investorDataMap = investorDataSource.investorDataMapRepo();
-		Map<String, Integer> tickerCountMap = new HashMap<>();
-		for (Entry<Integer, Map<String, List<InvestorData>>> e : investorDataMap.entrySet()) {
-			Map<String, List<InvestorData>> tickerMap = e.getValue();
-			for(Entry<String, List<InvestorData>> et : tickerMap.entrySet()){
-				int boughtCount = 0;
-				for (InvestorData d : et.getValue()) {
-					if (d.getType().equals(TradeType.BUY)) {
-						boughtCount++;
-					}
-				}
-				if(tickerCountMap.containsKey(et.getKey())){
-					tickerCountMap.put(et.getKey(), tickerCountMap.get(et.getKey())+boughtCount);
-				}else{
-					tickerCountMap.put(et.getKey(), boughtCount);
-				}
-				
-			}	
-		}
-		Stack<String> stack = new Stack<>();
-		int maxCount = 0;
-		for (Entry<String, Integer> e : tickerCountMap.entrySet()) {
-			if (maxCount <= e.getValue()) {
-				maxCount = e.getValue();
-				stack.push(e.getKey());
-			}
-		}
-
-		// assuming most bought ticker count is never same for two(or more)
-		// tickers
-		System.out.println("Most Bought Ticker=" + stack.peek());
-
-		return stack.pop();
-	}
-
-	@Override
 	public String getMostSoldTicker() {
 		Map<Integer, Map<String, List<InvestorData>>> investorDataMap = investorDataSource.investorDataMapRepo();
 		Map<String, Integer> tickerCountMap = new HashMap<>();
-		for (Entry<Integer, Map<String, List<InvestorData>>> e : investorDataMap.entrySet()) {
-			Map<String, List<InvestorData>> tickerMap = e.getValue();
-			for(Entry<String, List<InvestorData>> et : tickerMap.entrySet()){
-				int sellCount = 0;
-				for (InvestorData d : et.getValue()) {
-					if (d.getType().equals(TradeType.SELL)) {
-						sellCount++;
-					}
-				}
-				if(tickerCountMap.containsKey(et.getKey())){
-					tickerCountMap.put(et.getKey(), tickerCountMap.get(et.getKey())+sellCount);
-				}else{
-					tickerCountMap.put(et.getKey(), sellCount);
-				}
-				
-			}	
-		}
+		investorDataMap.entrySet().stream()
+		.map(e -> e.getValue())
+		.forEach(et -> et.entrySet().stream()
+				.map(et1 -> et1.getValue())
+				.forEach(list -> list.stream()
+						.filter(d -> d.getType().equals(TradeType.SELL))
+						.filter(d -> d!=null)
+						.forEach(data -> {
+							if (tickerCountMap.containsKey(data.getTicker())) {
+								tickerCountMap.put(data.getTicker(), tickerCountMap.get(data.getTicker()) + 1);
+							} else {
+								tickerCountMap.put(data.getTicker(), 1);
+							}
+						})));
+		
+		
 		Stack<String> stack = new Stack<>();
-		int maxCount = 0;
-		for (Entry<String, Integer> e : tickerCountMap.entrySet()) {
-			if (maxCount <= e.getValue()) {
-				maxCount = e.getValue();
-				stack.push(e.getKey());
+		tickerCountMap.forEach((ticker, count) -> {
+			if (stack.isEmpty()) {
+				stack.push(ticker);
+			} else {
+				if (count >= tickerCountMap.get(stack.peek())) {
+					stack.push(ticker);
+				}
 			}
-		}
-
-		// assuming most bought ticker count is never same for two(or more)
-		// tickers
-		System.out.println("Most Sold Ticker=" + stack.peek());
-
+		});
+		System.out.println("Most Sold Ticker= " + stack.peek());
+		return stack.pop();
+	}
+	
+	@Override
+	public String getMostBoughtTicker() {
+		Map<Integer, Map<String, List<InvestorData>>> investorDataMap = investorDataSource.investorDataMapRepo();
+		Map<String, Integer> tickerCountMap = new HashMap<>();
+		investorDataMap.entrySet().stream()
+		.map(e -> e.getValue())
+		.forEach(et -> et.entrySet().stream()
+				.map(et1 -> et1.getValue())
+				.forEach(list -> list.stream()
+						.filter(d -> d.getType().equals(TradeType.BUY))
+						.filter(d -> d!=null)
+						.forEach(data -> {
+							if (tickerCountMap.containsKey(data.getTicker())) {
+								tickerCountMap.put(data.getTicker(), tickerCountMap.get(data.getTicker()) + 1);
+							} else {
+								tickerCountMap.put(data.getTicker(), 1);
+							}
+						})));
+		
+		
+		Stack<String> stack = new Stack<>();
+		tickerCountMap.forEach((ticker, count) -> {
+			if (stack.isEmpty()) {
+				stack.push(ticker);
+			} else {
+				if (count >= tickerCountMap.get(stack.peek())) {
+					stack.push(ticker);
+				}
+			}
+		});
+		System.out.println("Most Bought Ticker= " + stack.peek());
 		return stack.pop();
 	}
 
@@ -217,12 +206,6 @@ public class InvestorDataServiceImpl implements InvestorDataService {
 		return map;
 	}
 
-	/**
-	 * An investor is defined as active if they have made more than two trades
-	 * on two or more consecutive days.
-	 * 
-	 * @return
-	 */
 	@Override
 	public List<Integer> getActiveInvestors() {
 		List<Integer> activeInvestors = new ArrayList<>();
@@ -269,10 +252,10 @@ public class InvestorDataServiceImpl implements InvestorDataService {
 
 	@Override
 	public void printActiveInvestors() {
-		List<Integer> active =  getActiveInvestors();
+		List<Integer> active = getActiveInvestors();
 		System.out.print("The active investors are ");
-		for(Integer i : active){
-			System.out.print(i+",");
+		for (Integer i : active) {
+			System.out.print(i + ",");
 		}
 		System.out.println();
 	}

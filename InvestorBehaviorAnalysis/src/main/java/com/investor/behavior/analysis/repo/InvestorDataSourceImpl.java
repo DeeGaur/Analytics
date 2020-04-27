@@ -18,11 +18,7 @@ import com.investor.behavior.analysis.model.TradeType;
 @Repository
 public class InvestorDataSourceImpl implements InvestorDataSource {
 
-	private static List<InvestorData> list = new ArrayList<>();
-	private static Map<Integer, List<InvestorData>> investorDataMap= new HashMap<Integer, List<InvestorData>>();
-
-	private static Map<Integer, Map<String, List<InvestorData>>> dataMapById = new HashMap<>();
-	
+	private static Map<Integer, Map<String, List<InvestorData>>> dataMap = new HashMap<>();
 	private String fileName;
 	private final String CSV_DELIMITER=",";
 
@@ -32,22 +28,10 @@ public class InvestorDataSourceImpl implements InvestorDataSource {
 		dataSourceFromJSONFile();
 	}
 
-
 	@Override
 	public Map<Integer, Map<String, List<InvestorData>>> investorDataMapRepo() {
-		return dataMapById;
+		return dataMap;
 	}
-
-	@Override
-	public List<InvestorData> investorDataRepo() {
-		return list;
-	}
-
-	@Override
-	public Map<Integer, List<InvestorData>> investorDataMap() {
-		return investorDataMap;
-	}
-	
 
 	public void dataSourceFromCSVFile() {
 
@@ -66,23 +50,9 @@ public class InvestorDataSourceImpl implements InvestorDataSource {
 	                investorData.setDate(date);
 	                investorData.setType(TradeType.valueOf(data[3].trim()));
 	                investorData.setAmount(Double.parseDouble(data[4].trim()));
-	                list.add(investorData);  
-	                
-	                //data setup in map
-	                if(investorDataMap.containsKey(investorData.getInvestorId())){
-        				investorDataMap.get(investorData.getInvestorId()).add(investorData);
-        			}else {
-        				List<InvestorData> l = new ArrayList<>();
-        				l.add(investorData);
-        				investorDataMap.put(investorData.getInvestorId(), l);
-        			}
-	                
-	                //organized map
-	                //Map<String, Map<TradeType, InvestorData>> dataMapByTicker = new HashMap<String, Map<TradeType,InvestorData>>();
-                	//Map<TradeType, InvestorData> dataMapByTradeType = new EnumMap<>(TradeType.class);
-                	
-	                if(dataMapById.containsKey(investorData.getInvestorId())){
-	                	Map<String, List<InvestorData>> dataMapByTicker = dataMapById.get(investorData.getInvestorId());
+	            
+	                if(dataMap.containsKey(investorData.getInvestorId())){
+	                	Map<String, List<InvestorData>> dataMapByTicker = dataMap.get(investorData.getInvestorId());
 	                	if(dataMapByTicker.containsKey(investorData.getTicker())){
 	                		dataMapByTicker.get(investorData.getTicker()).add(investorData);
 	                	}else{
@@ -96,9 +66,8 @@ public class InvestorDataSourceImpl implements InvestorDataSource {
 	                	List<InvestorData> list = new ArrayList<>();
 	                	list.add(investorData);
 	                	dataMapByTicker.put(investorData.getTicker(), list);
-	                	dataMapById.put(investorData.getInvestorId(), dataMapByTicker);
+	                	dataMap.put(investorData.getInvestorId(), dataMapByTicker);
 	                }
-	                
 	            }
 			
 		} catch (Exception e) {
@@ -111,14 +80,6 @@ public class InvestorDataSourceImpl implements InvestorDataSource {
 
 	}
 
-	public static List<InvestorData> getList() {
-		return list;
-	}
-
-	public static void setList(List<InvestorData> list) {
-		InvestorDataSourceImpl.list = list;
-	}
-
 	public String getFileName() {
 		return fileName;
 	}
@@ -126,24 +87,14 @@ public class InvestorDataSourceImpl implements InvestorDataSource {
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 	}
-	
-
-	public static Map<Integer, List<InvestorData>> getInvestorDataMap() {
-		return investorDataMap;
-	}
-
-	public static void setInvestorDataMap(Map<Integer, List<InvestorData>> investorDataMap) {
-		InvestorDataSourceImpl.investorDataMap = investorDataMap;
-	}
-
 
 	public static Map<Integer, Map<String, List<InvestorData>>> getDataMapById() {
-		return dataMapById;
+		return dataMap;
 	}
 
 
 	public static void setDataMapById(Map<Integer, Map<String, List<InvestorData>>> dataMapById) {
-		InvestorDataSourceImpl.dataMapById = dataMapById;
+		InvestorDataSourceImpl.dataMap = dataMapById;
 	}
 
 }
