@@ -31,14 +31,6 @@ public interface InvestorDataService {
 	public void printSmallestAndLargestTradeForAll();
 	
 	/**
-	 * prints the active investor id
-	 * 
-	 * An investor is defined as active if they have made more than two trades
-	 * on two or more consecutive days.
-	 */
-	public void printActiveInvestors();
-	
-	/**
 	 * An investor is defined as active if they have made more than two trades
 	 * on two or more consecutive days.
 	 * 

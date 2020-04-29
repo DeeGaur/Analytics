@@ -63,11 +63,7 @@ public class InvestorDataServiceImpl implements InvestorDataService {
 				investorList.add(e.getKey());
 			}
 		}
-		System.out.print("Buy And Hold Investors are ");
-		for (Integer i : investorList) {
-			System.out.print(i + ",");
-		}
-		System.out.println();
+		System.out.println("Buy And Hold Investors are "+investorList.toString());
 		return investorList;
 	}
 
@@ -247,16 +243,8 @@ public class InvestorDataServiceImpl implements InvestorDataService {
 		} catch (DataNotFoundException ex) {
 			ex.printStackTrace();
 		}
+		System.out.println("The active investors are "+activeInvestors.toString());;
 		return activeInvestors;
 	}
 
-	@Override
-	public void printActiveInvestors() {
-		List<Integer> active = getActiveInvestors();
-		System.out.print("The active investors are ");
-		for (Integer i : active) {
-			System.out.print(i + ",");
-		}
-		System.out.println();
-	}
 }

@@ -11,7 +11,7 @@ public class App {
 		AbstractApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
 		InvestorDataService service = ctx.getBean(InvestorDataService.class);
 		service.printSmallestAndLargestTradeForAll();
-		service.printActiveInvestors();
+		service.getActiveInvestors();
 		service.getMostBoughtTicker();
 		service.getMostSoldTicker();
 		service.getBuyAndHoldInvestors();

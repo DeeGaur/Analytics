@@ -49,7 +49,8 @@ public class InvestorData {
 	
 	@Override
 	public String toString(){
-		return "["+this.investorId+" "+this.ticker+" "+this.date.format(DateTimeFormatter.ofPattern("M/d/yyyy"))+"]";
+		return "["+this.investorId+" "+this.ticker+" "+this.date.format(DateTimeFormatter.ofPattern("M/d/yyyy"))
+			+" "+this.type+" "+this.amount+"]";
 	}
 	
 	
